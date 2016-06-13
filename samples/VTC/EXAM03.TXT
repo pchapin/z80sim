@@ -1,0 +1,56 @@
+EL-214 Exam #3
+Open Everything
+
+
+NAME:_________________________________________________________ Dec 11, 1991
+
+1.  What control word and time constant would you have to send to a
+    CTC channel to program it as a counter that could count 50 rising
+    edges of the CLK input? Don't worry about interrupts.
+
+
+2.  Write the subroutine Initialize CTC below. The subroutine is to
+    program channel 2 of the CTC as a timer using a time constant of
+    37h. Use a prescale factor of /256 and auto triggering. Enable
+    interrupts and initialize the Z-80 interrupt system so that
+
+          The interrupt vector table is located in the range
+          1D00 - 1DFF.
+
+          The CTC is using interrupt vectors 60h, 62h, 64h, and 66h.
+
+          The channel 2 interrupt service routine is at 19A8h.
+
+    CTC_0   EQU  40h     ; Use these equates in your program.
+    CTC_1   EQU  41h
+    CTC_2   EQU  42h
+    CTC_3   EQU  43h
+
+    Initialize_CTC:
+
+
+
+3.  Assume you are using a Z-80 system with a 4MHz clock. Assume also
+    that you wanted to generate an interrupt every second. What time
+    constant(s) would you need to send to a CTC to do this? Would you
+    program the CTC in counter mode or timer mode?
+
+
+4.  Consider the simple D/A circuit shown below. What is the step size
+    and full scale voltage?
+
+
+5.  Suppose you were working with an eight bit D/A converter that had
+    a FULL SCALE output voltage of 12.000 volts. Assume also that the
+    Z-80 you're working with had a clock frequency of 6MHz. Consider the
+    program below.
+
+     LD   A, 00
+Loop:
+     OUT  (DAC), A
+     SUB  10h
+     JP   Loop
+
+     What is the shape of the output waveform? Show a sketch that includes
+     correct voltages and times. You don't need to worry about showing
+     all the steps.

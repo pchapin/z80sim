@@ -1,0 +1,173 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE   : m.tex
+% AUTHOR : Peter Chapin
+% SUBJECT: User-mode documentation for the M multi-tasking kernel.
+%
+% Send comments to Peter Chapin (PChapin@vtc.vsc.edu).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+% ++++++++++++++++++++++++++++++++
+\documentclass{article}
+% \pagestyle{headings}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1.75ex plus0.5ex minus0.5ex}
+
+% +++++++++++++++++++
+% The document itself
+% +++++++++++++++++++
+\begin{document}
+
+% ----------------------
+% Title page information
+% ----------------------
+\title{The M System\\
+       User-Mode Documentation}
+\author{Peter Chapin}
+\date{February, 1996}
+\maketitle
+
+\section{Introduction}
+
+The M system is a simple multi-tasking kernel for an embedded controller. The current
+implementation of M supports exactly four tasks (no more, no less) executing in infinite loops
+out of ROM. M is implemented for a Z80 microprocessor.
+
+Although simple, M is nevertheless a useful teaching tool. I present it in the operating systems
+class at Vermont Technical College as a way of showing the students how some of the nitty-gritty
+details of multi-processing might be done.
+
+\section{Memory Map}
+
+Broadly speaking, the memory map is divided into a ROM section and a RAM section. The ROM
+section is divided into a data segment and a text (code) segment. The data segment is further
+divided into a section for the system's use and sections for use by each of the four application
+programs. The code segment is also divided into a system section and four application sections.
+The system section is divided into the initialization code, the interrupt service routines, and
+the system service calls. Each application is free to organize its own structure as it sees fit.
+In particular, each application can define it's own subroutines. M does not support device
+drivers in the usual sense. All low level hardware support is built directly into the kernel.
+
+The RAM section is also divided into a section for the system and four application specific
+sections. The application RAM contains a stack for each application. The system also maintains
+its own stack although, in the current implementation, it isn't really necessary.
+
+Due to the limitations of the assembler we used, every label in the entire system must have a
+unique label. This means that applications cannot really choose their labels freely. There can
+be no label name conflicts between the applications or between the applications and the system.
+For a small system like M created by a small group of people, this isn't really that big a
+problem.
+
+\section{System Service Calls}
+
+This section documents the service calls offered to the applications by the system.
+
+\subsection{Terminal Handling}
+
+\subsubsection{Get\_Char}
+
+This routine returns a keystroke from the keyboard. If there are no keystrokes waiting in the
+keyboard buffer, this routine blocks until one is available. The calling task should lock the
+keyboard before calling this routine. If the calling task has not locked the keyboard, this
+routine returns at once with a key code of zero.
+
+\subsubsection{Put\_Char}
+
+This routine prints a character to the console's display. It does not return until the character
+has been printed. This implementation does not supported buffered output.
+
+Multiple tasks can call Put\_Char at the same time. The order in which their output appears is
+undefined, but all characters will be displayed without any loss of information. If one or more
+tasks wish to synchronize their outputs, those tasks will have to cooperate between themselves.
+
+\subsubsection{Lock\_Keyboard}
+
+This routine uses semaphores internally to provide a task with exclusive access to the keyboard.
+If another task has locked the keyboard when a certain task calls this routine, then the calling
+task will be blocked until the task that owns the keyboard calls UnLock\_Keyboard. Be sure a
+task does not attempt to lock the keyboard twice in a row. If a task attempts to do so, it will
+deadlock.
+
+\subsubsection{UnLock\_Keyboard}
+
+This routine undoes the effect of Lock\_Keyboard. If the calling task has not locked the
+keyboard, this routine has no effect. If other tasks are blocked trying to lock the keyboard,
+this routine will unblock the highest priority task and keep the keyboard locked (the lock being
+owned by the newly unblocked task).
+
+\subsection{Process Control}
+
+\subsubsection{Sema\_Down}
+
+This routine performs a ``down'' operation on a semaphore. If the semaphore is not zero, it is
+decremented. If the semaphore is zero, the calling task is blocked until some other task
+performs a Sema\_Up call on the semaphore. The testing, decrementing, and blocking are done in
+an atomic fashion.
+
+\subsubsection{Sema\_Up}
+
+This routine performs an ``up'' operation on a semaphore. If the semaphore is not zero, it is
+incremented. If the semaphore is zero, this routine will unblock the highest priority task that
+is waiting on that semaphore. In that case, the semaphore will remain at zero (the newly
+unblocked task having effectively completed its ``down'' operation). If there are no tasks
+waiting on the zero semaphore, then the semaphore is simply incremented.
+
+\subsubsection{Set\_Priority}
+
+This routine sets the priority of the calling task. The M scheduler runs the highest priority
+unblocked task.
+
+\section{Conclusion}
+
+Pretty neat system!
+
+\appendix
+
+\section{To-do List}
+
+There are many areas where M needs help. Here are some things to do with a few implementation
+notes.
+
+\subsection{Implement Priorities}
+
+To implement task priorities the task table entry structure will need an additional priority
+member. The initialization code will need to set the priority of each task to it's initial
+value. I suggest an initial value of 10 to allow for both increases and decreases.
+
+The scheduler will then have to be modified so that it schedules the highest priority unblocked
+task. This means that it will have to search the entire task table at each interrupt. This needs
+to happen in such a way as to allow tasks with the same priority to run in round-robin fashion.
+
+\subsection{Implement the Idle Loop}
+
+The system should have an idle loop to soak up otherwise unused CPU cycles. Once priorities have
+been implemented, the idle loop could simply be a fifth, internal task that is initialized at a
+priority of zero. The body of the task should just be a jump instruction that jumps to itself.
+
+\subsection{Implement a Blocking Get\_Char}
+
+The current Get\_Char busy waits if there are no characters in the keyboard buffer. In
+particular, it sits in a loop checking the buffer to see if there are any characters in it. This
+is horribly inefficient. Instead, Get\_Char should mark the calling task as blocked and then
+schedule a different task to run if there are no characters in the keyboard buffer.
+
+Doing this correctly is tricky. For one thing, you want to be sure that it checks the buffer and
+marks the task as blocked in an atomic way. You don't want an untimely arrival of a keyboard
+interrupt to cause problems. Scheduling another task is also tricky. The scheduler ISR is
+designed to be called as an interrupt service routine. Is it possible to call it as a normal
+routine? That question needs to be looked at.
+
+In addition, the serial port ISR needs to be modified to mark the task as unblocked. Should the
+keyboard ISR attempt to reschedule? (What if the task waiting for the keystroke is higher in
+priority than the task that was executing at the time of the interrupt?)
+
+\subsection{Implement Lock\_Keyboard}
+
+One easy way to do this is to create an internal, system semaphore associated with the keyboard.
+The Lock\_Keyboard function can then just do a Sema\_Down on that semaphore. UnLock\_Keyboard
+can do the corresponding Sema\_Up. The only tricky part is the requirement that Get\_Char be
+able to tell if the calling task has the keyboard locked or not. This could be done by checking
+the Blocked flag and the Sema\_Address in the task table
+
+\end{document}

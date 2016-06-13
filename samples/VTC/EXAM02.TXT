@@ -1,0 +1,109 @@
+EL-214 Exam #2
+Open Everything
+
+
+NAME:_________________________________________________________ Nov 12, 1991
+
+1.  The circuit below shows a 4Kx8 RAM chip with its decoding logic.
+    Draw a memory map showing where the RAM chip's location and the
+    locations of any copies of the chip that might exist (foldback
+    memory).
+
+
+2.  The program below exercises two I/O ports.
+
+          ORG  1800h
+    Loop:
+          IN   A, (40h)
+          OUT  (60h), A
+          JP   Loop
+
+    For each instruction, specify the machine cycles that the processor
+    would execute. For each machine cycle specify what you would expect
+    to see on the address and data lines. Be as specific as you can.
+
+
+3.  Write a program fragment which does the following:
+
+    A.    Initialize an 8255A so that port A and port C are outputs
+          (mode 0) and port B is an input (mode 0).
+
+    B.    Use the bit set/reset mode to turn on the MSB and LSB of
+          port C.
+
+    Use the equates below
+
+    PORT_A     EQU       40h
+    PORT_B     EQU       41h
+    PORT_C     EQU       42h
+    CNTRL_PORT EQU       43h
+
+
+
+4.  Answer the following questions regarding interrupts.
+
+     A) What is the minimum amount of stack space used by an interrupt
+        service routine. Explain.
+
+
+
+
+
+
+
+
+
+     B) Suppose you are working with a device that will need some
+        kind of service within 100 uS after it requests service (or
+        it will explode). Is it feasible for this device to be serviced
+        by software (ie an ISR) or must it be handled totally with
+        hardware? What if it needs service in 1 uS? Explain.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     C) In this class we've talked about enabling interrupts at the end
+        of the ISR. This prevents the ISR from itself being interrupted.
+        Is it necessarly an error to have an ISR get interrupted? If so,
+        explain why. If not, explain when you might want it to happen.
+
+
+5.  Suppose the following code is executed to initialize a Z-80 system.
+
+     LD   DE, IVT
+     LD   HL, 1A00h
+     LD   B, 08h
+Copy_Loop:
+     LD   A, (DE)
+     LD   (HL), A
+     INC  HL
+     INC  DE
+     DJNZ Copy_Loop
+
+     LD   A, 1Ah
+     LD   I, A
+     IM   2
+     EI
+     ; etc ...
+
+IVT: DEFB 012h, 034h, 056h, 078h
+     DEFB 09Ah, 0BCh, 0DEh, 0F0h
+
+
+
+
+     Suppose also that the hardware shown above was connected to the
+     Z-80's busses. When the DEV* signal goes low an interrupt is
+     requested. What is the address of the interrupt service routine?
+     FOR FULL CREDIT, DESCRIBE YOUR REASONING!

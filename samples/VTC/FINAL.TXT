@@ -1,0 +1,184 @@
+EL-214 Final
+Open Everything
+
+NAME:_________________________________________________________ Dec 17, 1991
+
+
+1. Suppose the registers contained the following:
+
+     A = 10h
+B = 20h  C = FFh
+D = 0Fh  E = 40h
+H = 53h  L = 9Ch
+
+Show what the S, Z, and C flags will be after each of the instructions
+in the following program executes.
+
+Instruction         S         Z         C
+CP   B
+
+CP   C
+
+CP   A
+
+CP   D
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Explain what is meant by the phrase "a pointer."
+
+
+3. Assemble the following program. Use a starting address of 1900h
+
+     LD   IX, 1D00
+     LD   B, 10
+Top:
+     INC  (IX-2)
+     INC  IX
+     DEC  B
+     JP   NZ, Top
+     HALT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4. What range of addresses activates the indicated output below.
+
+
+5. Suppose the following circuit is connected to the data bus of a Z-80
+   system. If the processor is run in interrupt mode 0, what is the
+   address of the interrupt service routine?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6. Explain the function of the I register.
+
+
+7. Suppose an analog input signal is to be sampled at the rate of 40,000
+   samples per second. How many "typical" Z-80 instructions could be
+   executed between samples? Explain your reasoning. Do you think any
+   significant processing could be done by a Z-80 on data coming at
+   such a rate?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8. Suppose you were working with a Z-80 CTC that was decoded so that
+   channels zero through three appeared at port addresses 90h - 93h.
+   Write a program fragment (ie show instructions) that will configure
+   channel zero as a counter to count 100 external events. Have the CTC
+   interrupt the Z-80 when done using interrupt vector number 70h. Make
+   any don't care or unspecified bits in the control word zeros.
+
+9. The program below writes to an eight bit D/A converter that has a
+   9 volt full scale voltage. Sketch the waveform coming out of the
+   converter. Show each step along with its voltage. You do not need
+   to show times.
+
+   Top:
+     LD   HL, Table
+     LD   B,  8h
+   Loop:
+     LD   A, (HL)
+     OUT  (DAC), A
+     INC  HL
+     DJNZ Loop
+     JP   Top
+
+   Table:
+     DEFB 010h, 020h, 030h, 040h, 080h, 090h, 0A0h, 0B0h
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+10. What control word do you need to send to an 8255A to configure it
+    so that ports A and C are simple inputs and port B is a simple
+    output?
+

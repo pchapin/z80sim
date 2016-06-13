@@ -1,0 +1,187 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE         : lab11.tex
+% AUTHOR       : Peter Chapin
+% LAST REVISED : November 1995
+% SUBJECT      : EL-214, Interrupt Lab.
+%
+%
+% Send comments to Peter Chapin (pchapin@night.vtc.vsc.edu) or at the
+%   snail mail address of:
+%
+%       Peter Chapin
+%       Vermont Technical College
+%       Main Street
+%       Randolph Center, VT. 05061
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+% ++++++++++++++++++++++++++++++++
+\documentstyle{article}
+% \pagestyle{headings}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1.75ex plus0.5ex minus0.5ex}
+
+% +++++++++++++++++++
+% The document itself
+% +++++++++++++++++++
+\begin{document}
+
+\centerline{\Large{EL-214 Lab}}
+\centerline{\Large{Interrupts}}
+\vspace{0.5in}
+
+\underline{\large{Introduction}}
+
+Interrupts are essential in almost all non-trivial computer systems.
+Whenever a single processor is trying to do several things at once,
+interrupts are almost certainly involved. This is true for both large,
+multi-user operating systems and small, dedicated hardware controllers.
+Interrupts also allow the machine to work on CPU intensive tasks while
+waiting for slow I/O devices (like keyboards and disk drives). Instead of,
+for example, just sitting in a loop polling a switch, the switch can be
+configured to generate an interrupt when it is active and thus free the
+processor so it can tend to other activities while the switch is inactive.
+
+In this lab, you will explore some of these issues.
+
+\underline{\large{The Main Program}}
+
+The main program in this lab simply counts on the seven segment display. It
+includes a short delay so that you can follow the counting more easily.
+
+\begin{verbatim}
+DELAY   EQU     0FFDh
+HEXTO7  EQU     0FF1h
+SCAN    EQU     0FEEh
+
+        ORG     1800h
+        JP      Start
+
+        ; Data used by this program.
+Count:  DW      0000h
+
+        ; ---------------
+        ; Initialization.
+        ; ---------------
+Start:
+        ; Initialize the 8255.
+        LD      A, 80h
+        OUT     (0C3h), A
+
+        ; Store address of ISR into 1F41h.
+        LD      A, LOW(ISR)
+        LD      (1F41h), A
+        LD      A, HIGH(ISR)
+        LD      (1F42h), A
+
+        ; Initialize the count.
+        LD      BC, 00h
+        LD      (Count), BC
+
+        ; We can now accept interrupts.
+        IM      1
+        EI
+
+        ; -------------
+        ; Main Program.
+        ; -------------
+Loop:
+        ; Convert the current count for display.
+        LD      BC, (Count)
+        LD      A, B
+        LD      (1F12h), A
+        LD      A, C
+        LD      (1F13h), A
+        LD      A, 00h
+        LD      (1F14h), A
+        CALL    HEXTO7
+
+        ; Display it for 10 mS.
+        CALL    SCAN
+
+        ; Next count.
+        LD      BC, (Count)
+        INC     BC
+        LD      (Count), BC
+        JP      Loop
+
+        ; ------------------------------
+        ; The Interrupt Service Routine.
+        ; ------------------------------
+
+ISR:    ; You write this part!
+        EI
+        RET
+\end{verbatim}
+
+\underline{\large{Part 1}}
+
+Build the hardware shown on the attached schematic. Connect the clock input
+of the flip flop to the active high output of PB0. Thus whenever you press
+PB0, you will generate an interrupt request.
+
+Write an interrupt service routine that displays the current value of
+`Count' on the 16 LEDs on the left side of the trainer (at ports 0C1h and
+0C0h). With the program running, you should be able to push the button and
+``capture'' the value of the counter at that moment.
+
+Set the logic analyzer to trigger on the interrupt acknowledge machine
+cycle. Capture a sample that shows a significant amount of information both
+before and after the trigger event. Verify that the system is executing
+your interrupt service routine. Record the instructions executed by the
+CAMI before your ISR is actually entered.
+
+\begin{enumerate}
+
+\item Calculate how long the ISR takes to execute. (For the CAMI, T=558.7 nS)
+Take into account the T states used by the instructions in the CAMI ROM.
+Does the ISR represent a significant load on the system?
+
+\item What is the processor spending most of its time doing?
+
+\item What would happen if you connected the switch directly
+to the $\overline{\mbox{INT}}$ line of the processor? Try it.
+
+\end{enumerate}
+
+\underline{\large{Part 2}}
+
+Adjust a function generator to produce a TTL compatible square wave at it's
+output (voltage from zero to five volts). Set the frequency to
+approximately 1 Hz. Connect the output of the function generator to the
+clock input of the flip flop in your interrupt circuit. Observe the effect
+as you modify the frequency.
+
+Modify your interrupt service routine so that it toggles the speaker bit on
+the 8255 on the right hand side of the trainer. Set the function generator
+to 100 Hz so that 100 interrupts are generated every second. Note the
+effect on the speaker.
+
+Using the 'scope, trigger on the square wave being fed to the speaker and
+then observe the waveform from the function generator. Also observe the
+interrupt acknowledge signal. Sketch these waveforms.
+
+Increase the interrupt frequency until the main program stops. What is that
+frequency? Observe what happens to the scanning as the fraction of time
+spent in the interrupt service routine increases.
+
+\begin{enumerate}
+
+\item What is the frequency of the signal driving the speaker when the
+interrupt frequency is 100 Hz?
+
+\item You should be able to calculate the interrupt frequency at which
+the main program stops making progress. How does it compare with your
+observed frequency?
+
+\end{enumerate}
+
+\underline{\large{Write-Up}}
+
+Submit listings of the programs you used, a description of your
+observations, the waveform sketches you made in part 2 (with an
+explaination of their meaning), and the answers to the questions.
+
+\end{document}

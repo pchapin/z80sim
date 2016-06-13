@@ -1,0 +1,689 @@
+!BRK
+                                 brk
+                                 ---
+
+brk at ADDRESS on|off
+  or
+brk all off
+  or
+brk where
+
+          The brk command manages breakpoints. Up to 10 breakpoints
+     can be set simultaneously. If a breakpoint is placed on an
+     instruction, then simulation will stop just before that
+     instruction begins execution. The breakpoint must be placed on
+     the first byte of the instruction. If the breakpoint is placed on
+     a later byte, the instruction is simulated (correctly), but the
+     simulation will not stop.
+          The first form the of the brk command allows you to set and
+     clear breakpoints. To, for example, set a breakpoint at address
+     1234H, you simply enter "brk at 1234 on". The second form of the
+     instruction allows you to clear all breakpoints easily. Finally,
+     the third form of the instruction displays a list of all
+     currently active breakpoints.
+          Simulation stops just before the breakpoint instruction
+     executes. Then, provided you don't change the PC, you can resume
+     the simulation without breaking on the same instruction right
+     away.
+
+     Possible Messages:
+
+     "WARNING: Breakpoint already set at ADDRESS."
+
+          This occurs when you try to set a breakpoint on an address
+          which already contains an active breakpoint. The breakpoint
+          remains active.
+
+     "WARNING: No breakpoint active at ADDRESS."
+
+          This occurs when you try to clear a breakpoint from an
+          address which does not contain an active breakpoint.
+
+     "WARNING: No breakpoints."
+
+          This occurs in response to a "brk all off" or "brk where"
+          command when there are no active breakpoints.
+
+!CLEAR
+                                clear
+                                -----
+
+clear FLAG_NAME
+  or
+clear REG_NAME
+  or
+clear ADDRESS[,ADDRESS]
+
+          The clear command can be used to clear the value of various
+     objects to zero. The first format allows you to clear flags (see
+     the set command if you wish to set them to 1). Allowed flag names
+     are: cflag, zflag, sflag, pflag, vflag, hflag, and nflag. Notice
+     that the P/V flag is treated as two separate flags. After a
+     "clear pflag" or clear "vflag" command, the display will show the
+     flag as "P" or "V" accordingly.
+          The second format of the command allows you to clear a
+     register or register pair. Allowed register names are: A, F, B,
+     C, D, E, H, L, BC, DE, HL, IX, IY, SP, and PC. To clear the
+     alternate register set, you must first use the exchange command.
+          The third format allows you to clear a memory location (or a
+     range of memory locations).
+          Note that the clear command will cause the cleared object to
+     be marked as initialized.
+
+!CLOCK
+                                clock
+                                -----
+
+clock at CLOCK_FREQUENCY
+  or
+clock at
+
+          The clock command allows you to register the clock speed of
+     your Z-80 with Z80SIM. The current version of Z80SIM will only
+     use this information when it prints the simulation time when a
+     simulation terminates. You do not need to specify a clock
+     frequency to use all of Z80SIM's features.
+          The first form of the command lets you set the frequency.
+     CLOCK_FREQUENCY must be in MHz. The second form of the command
+     displays the currently set clock frequency.
+
+     Possible Messages:
+
+     "INFO: Clock set to CLOCK_FREQUENCY."
+
+          This is the response to "clock at" when a clock frequency
+          has been set.
+
+     "WARNING: No clock frequency has been set."
+
+          This is the response to "clock at" when a clock frequency
+          has not been set.
+
+     "WARNING: Unusual clock frequency: CLOCK_FREQUENCY."
+
+          This message will be seen if a clock frequency less than 1
+          MHz or greater than 12 MHz is specified.
+
+     "ERROR: Illegal clock frequency: CLOCK_FREQUENCY."
+
+          This message occurs if there are illegal characters in
+          CLOCK_FREQUENCY or if CLOCK_FREQUENCY is a poorly formed
+          floating point number.
+
+!DISASM
+                               disasm
+                               ------
+
+
+disasm ADDRESS|(PC) [to FILENAME]
+
+          The disasm command displays a disassembled listing of a
+     section of memory. You may either specify the address of the
+     beginning of region to be disassembled, or you may use the
+     address currently stored in the PC for that purpose. The
+     disassembled listing has the following format:
+
+     Addr  Object Code   Operator  Operand  ASCII Equivalent
+     0000  CD0021        CALL      0021     ;...
+
+          A screenful of disassembled code will be displayed followed
+     by the message "--> More? [y]/n". If you select "y", another
+     screenful of code will be displayed.
+          If the optional filename is specified, the disassembled
+     listing will be written to the file as well as displayed. The
+     lines "--> More? [y]/n" are not written to the file.
+
+     Possible Messages:
+
+     "WARNING: Cannot open the file FILENAME for writing."
+
+          This message only occurs, obviously, when the optional
+          filename is specified. It is only a warning. The disasm
+          command will still show the listing on the screen.
+
+     "ERROR: Illegal register specified: Only PC allowed."
+
+          Note that the parens are also needed. If you leave them
+          out, the disasm command will assume your trying to specify
+          an address and it will issue the "Bad address" message.
+
+!DUMP
+                                dump
+                                ----
+
+dump ADDRESS|(REG_PAIR) [to FILENAME]
+
+          The dump command displays a substantial segment of memory on
+     the screen. Addresses, contents, and ASCII equivalents are all
+     shown. If the dump command is used with an ADDRESS, the dumped
+     memory is centered on the specified address. If a REG_PAIR is
+     named in the command, the dumped memory is centered on the
+     address currently stored in the register pair. Allowed register
+     pairs are HL, IX, IY, SP, and PC. After the memory is displayed
+     the prompt "--> More? [y]/n" appears allowing you to dump the
+     next segment in memory.
+          Any memory can be dumped including non-existent and
+     uninitialized memory. Uninitialized memory is shown with the
+     contents as ?? while non-existent memory is shown the contents as
+     "--"
+          The format of the dump is as shown below.
+
+Addr Data                                                ASCII form of data
+0000 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00 : ................
+
+          If the optional filename is specified, the dump listing will
+     be written to the file as well as displayed. The lines "--> More?
+     [y]/n" are not written to the file.
+
+     Possible Messages:
+
+     "WARNING: Cannot open the file FILENAME for writing."
+
+          This message only occurs, obviously, when the optional
+          filename is specified. It is only a warning. The dump
+          command will still show the listing on the screen.
+
+     "ERROR: Illegal register specified."
+
+          Only HL, IX, IY, SP, and PC can be used with the register
+          form of this command. Note: the parens are needed also; if
+          they are left out, you will get a "Bad address" error.
+
+!EXCHANGE
+                              exchange
+                              --------
+
+exchange
+
+          The exchange command swaps the contents of the alternate or
+     "primed" registers with the main registers. In short the exchange
+     command has the same effect as the two instructions EXX and EX
+     AF,AF' have together. The exchange command is intended to be used
+     in connection with the set command (for example) to set values to
+     the alternate registers. Note: All register attributes are
+     swapped as well as values.
+
+!GET
+                                 get
+                                 ---
+
+get FILENAME
+
+          The get command reads a sim-state file (produced by the
+     save command) into Z80SIM. See the section on sim-state files for
+     a description of what these files contain. If no extension is
+     given .SIM is assumed.
+          Because loading a sim-state file destroys all data
+     previously in Z80SIM, the get command asks for confirmation with
+     the line "WARNING: Are you sure? [y]/n".
+
+     Possible Messages:
+
+     "ERROR: Cannot open the file FILENAME for reading."
+     
+          The specified file cannot be opened. Perhaps the name was
+          misspelled or perhaps a PATH was needed.
+
+     "ERROR: Errors reading the sim-state file."
+
+          The format of the specified file was not compatible with
+          that expected by Z80SIM. If this error message appears, you
+          should re-initialize Z80SIM. Depending on where the error
+          occurred, the information stored in Z80SIM may be
+          inconsistent because only a portion of the sim-state file
+          will have been loaded.
+
+!GO
+                                 go
+                                 --
+
+go
+
+          Go begins a simulation. There are no arguments. Once a
+     simulation has started there are only a few conditions that
+     would cause it to stop:
+
+      1.  A HALT instruction is executed (a HALT trap).
+      2.  A cntrl-C is typed on the keyboard (a cntrl-C trap).
+      3.  A breakpoint is encountered (a Breakpoint trap).
+      4.  Any other trap condition is encountered.
+
+          If a breakpoint is encountered, the instruction under the
+     breakpoint is left unexecuted. However, if the go command is re-
+     issued without changing the PC or breakpoint, that breakpoint is
+     skipped.
+
+     Possible Messages:
+
+     "ERROR: Z-80 is halted."
+
+          This message occurs if Z80SIM is in the halt state. Z80SIM
+          will only enter the halt state if it has executed a HALT
+          instruction. Thus you should only see this message if the PC
+          is pointing at a HALT instruction.
+
+!INIT
+                                init
+                                ----
+
+init
+
+          Init initializes the simulator to the same state it had
+     when it was first invoked. Since init destroys all the data
+     currently in the simulator, you will be asked for confirmation
+     with the line "WARNING: Are you sure? [y]/n".
+
+!INT
+                                 int
+                                 ---
+
+int RST_INSTRUCTION_NUMBER  (for mode 0)
+  or
+int                         (for mode 1)
+  or
+int VECTOR_NUMBER           (for mode 2)
+
+          The int command allows you to simulate the action of an
+     interrupt. The exact syntax to use depends on the current
+     interrupt mode of the Z-80.
+          For interrupt mode zero, Z80SIM assumes that a RST
+     instruction is gated onto the data bus during the interrupt
+     acknowledge machine cycle. You must tell Z80SIM which RST
+     instruction by providing 00, 08, 10, 18, 20, 28, 30, or 38 for
+     RST_INSTRUCTION_NUMBER.
+          For interrupt mode one, Z80SIM performs an automatic RST 38.
+     No parameters are needed.
+          For interrupt mode two, Z80SIM requires the appropriate
+     vector number. Z80SIM will ignore the least significant bit of
+     this number and use it to find the address of the interrupt
+     service routine (ISR).
+          Int instruction processing stops when the ISR address is
+     loaded into the PC. No instructions from the ISR are executed
+     until you issue a go or ss command. Also, during the int
+     instruction, trap detection is active. If a trap condition
+     occurs, you will be asked if you wish to proceed as usual. If you
+     elect not to proceed, Z80SIM will return to the same state it had
+     before you issued the int command.
+          If interrupts are disabled when you issue the int command,
+     there is no immediate effect. However, the interrupt is
+     "registered" with Z80SIM so that when interrupts are enabled,
+     interrupt processing takes place without your intervention. If a
+     simulation is taking place, the interrupt service routine is then
+     immediately executed. (Note: the interrupt is taken after the
+     first instruction after the EI instruction, exactly as it is done
+     in the real Z-80.)
+
+     Possible Messages:
+
+     "ERROR: Illegal RST instruction."
+
+          This error occurs if you specify a RST_INSTRUCTION_NUMBER
+          which is not among the allowed eight.
+
+     "WARNING: Interrupt vector number should be even."
+
+          Z80SIM will ignore the least significant bit of the
+          interrupt vector number.
+
+!LOAD
+                                load
+                                ----
+
+load FILENAME
+
+          The load command reads an Intel format hex file into the
+     simulated memory. The hex file contains information about
+     starting addresses so no address data need be specified with the
+     load command. If no extension is given .HEX is assumed.
+          The data in the hex file can be loaded into memory
+     regardless of the attributes of the memory. If data is loaded
+     into non-existent memory, that data will be visible as soon as
+     the memory is declared to exist. Loading data does not change any
+     attributes except the initialize attribute. Memory that is loaded
+     with data is marked as initialize.
+
+     Possible Messages:
+
+     "ERROR: Cannot open the file FILENAME for reading."
+     
+          The specified file cannot be opened. Perhaps the name was
+          misspelled or perhaps a PATH was needed.
+
+     "ERROR: Checksum error in HEX file."
+
+          The hex file had a checksum error in it. If this error
+          occurs, part of the hex file will have been loaded. Only the
+          portion of the file around the error and later will be
+          missing.
+
+!MEM
+                                 mem
+                                 ---
+
+mem rom|ram at ADDRESS[,ADDRESS]
+  or
+mem not at ADDRESS[,ADDRESS]
+  or
+mem at ADDRESS[,ADDRESS]
+
+          The mem command allows you to declare the attributes of
+     memory. See the section on attributes for a description of
+     memory attributes.
+          The mem command allows you to change either the RAM/ROM or
+     the Exists/Not Exists attribute. To change the Initialized/Not
+     Initialized attribute requires that the set command be used.
+          All of the syntaxes allow either a single location to be
+     changed or a range of locations.
+
+!NMI
+                                 nmi
+                                 ---
+
+nmi
+
+          The nmi command causes the simulated Z-80 to take a non-
+     maskable interrupt with trap detection enabled. There are no
+     arguments. If a trap condition occurs during the action of the
+     non-maskable interrupt, Z80SIM will ask, as usual, if you wish to
+     proceed. If you decide not to proceed, Z80SIM will return to the
+     same state it had just before you issued the nmi instruction.
+     Processing of the non-maskable interrupt stops when Z80SIM loads
+     the PC with 0066H. No instructions from the interrupt service
+     routine are executed unless you subsequently issue a go or ss
+     command.
+
+!PORTS
+                                ports
+                                -----
+
+ports in|out|in/out at PORT_ADDRESS[,PORT_ADDRESS]
+  or
+ports const VALUE at PORT_ADDRESS[,PORT_ADDRESS]
+  or
+ports not at PORT_ADDRESS[,PORT_ADDRESS]
+
+          The ports command allows you to declare the attributes of
+     the I/O ports. See the section on attributes for a description of
+     port attributes. 
+          If a port is declared to be an input port, then whenever
+     Z80SIM tries to read that port a trap condition is generated. The
+     trap message asks you for the value read from the port. You can
+     prevent this message from appearing if you've declared the port
+     to be a const port. In that case, Z80SIM will use the value you
+     gave every time it tries to read from that port. Note that both
+     input and output ports can be declared const; however, declaring
+     an output port const will have no effect unless it is later
+     redeclared to be an input port.
+          Note that all the syntaxes allow you to either specify one
+     port or a range of ports.
+
+!QUIT
+                                quit
+                                ----
+
+quit
+
+          This command causes Z80SIM to exit and return to the
+     operating system. Z80SIM always returns a status value
+     (ERRORLEVEL in MS-DOS) of zero (except when Z80SIM detects an
+     internal error). Because this command can cause loss of
+     information, Z80SIM asks for confirmation with the line:
+     "WARNING: Are you sure? [y]/n".
+
+!RESET
+                                reset
+                                -----
+
+reset
+
+          This command performs the same effect on the simulated Z-80
+     as would be produced in the real chip by grounding its RESET*
+     pin. In particular it:
+
+      1.  Disables both interrupt enable flip flops.
+      2.  Sets I = 00.
+      3.  Sets R = 00.
+      4.  Sets the interrupt mode to mode zero.
+      5.  Loads 0000 into the PC.
+
+          Notice that this does not reset the state of the simulator.
+     All memory, port, and register contents and attributes, including
+     breakpoints and user defined traps, will be retained. To re-
+     initialize the simulator you must use the init command.
+
+!SAVE
+                                save
+                                ----
+
+save FILENAME
+
+          The save command saves a sim-state file. See the section on
+     sim-state files for a description of these files. The get command
+     allows you to restore Z80SIM to the saved state. If no extension
+     is specified, .SIM is assumed.
+
+     Possible Messages:
+
+     "ERROR: Cannot open the file FILENAME for writing."
+
+          The specified file cannot be opened. Perhaps the disk is
+          write protected or perhaps the specified PATH is not valid.
+
+     "ERROR: Errors writing file."
+
+          The sim-state file could not be completely written to disk.
+          Perhaps the disk filled. Z80SIM attempts to erase the
+          aborted file.
+
+!SET
+                                 set
+                                 ---
+
+set FLAG_NAME
+  or
+set REG_NAME=VALUE
+  or
+set ADDRESS[,ADDRESS]=EIGHT_BIT_VALUE
+
+          The set command can be used to set the value of various
+     objects. The first format allows you to set flags (to 1 -- see
+     the clear command if you wish to set them to 0). Allowed flag
+     names are: cflag, zflag, sflag, pflag, vflag, hflag, and nflag.
+     Notice that the P/V flag is treated as two separate flags. Note
+     that after the command "set pflag" or "set vflag", the display
+     will show the flag as either "P" or "V" accordingly.
+          The second format of the command allows you to assign a
+     value to a register or register pair. Allowed register names
+     are: A, B, C, D, E, H, L, BC, DE, HL, IX, IY, SP, and PC. To
+     assign values to the alternate register set, you must first use
+     the exchange command. Note that the value used will be
+     interpreted as either an eight bit or a 16 bit value depending on
+     the register name used.
+          The third format allows you to assign an eight bit value to
+     a memory location (or a range of memory locations).
+          Note that the object which is set will be marked as
+     initialized.
+
+!SS
+                                 ss
+                                 --
+
+ss
+
+          This command causes Z80SIM to simulate the instruction
+     currently pointed at by the PC. If the instruction is simulated
+     successfully, Z80SIM will be in a state which reflects the action
+     of the instruction. If a trap condition is generated by the
+     simulation, and if you ask Z80SIM to abort the simulation, Z80SIM
+     will be left in the same state it had before you issued the ss
+     command.
+          If Z80SIM has just stopped on a breakpoint and if you have
+     not changed either the breakpoint or the PC, Z80SIM will not trap
+     on the breakpoint again if you issue the ss command.
+
+     Possible Messages:
+
+     "ERROR: Z-80 is halted."
+
+          This message occurs if Z80SIM is in the halt state. Z80SIM
+          will only enter the halt state if it has executed a HALT
+          instruction. Thus you should only see this message if the PC
+          is pointing at a HALT instruction.
+
+
+!TRAP
+                                trap
+                                ----
+
+trap on read|write from|to ADDRESS|REG_NAME
+  or
+trap when ADDRESS|REG_NAME=VALUE
+  or
+trap on|off
+  or
+trap when
+
+          The trap command allows you to define a trap condition. The
+     first time you use the trap command, you must use one of the
+     first two forms to specify the trap condition. That condition can
+     then be engaged or disengaged using the "trap on" or "trap off"
+     commands. Note that specifying a condition also activates that
+     condition.
+          The first form of the command tells Z80SIM to trap whenever
+     a "sensitive" location is about to be read (or written). The
+     noise word "from" must be used when a read is specified while
+     "to" must be used when a write is specified. A port address can
+     be specified by prepending a "p" to the address. For example, the
+     command "trap on read from p30" would cause a trap to occur on
+     the instruction "IN 30". If a register name is specified, the
+     following are allowed: A, B, C, D, E, H, L, BC, DE, HL, IX, IY,
+     SP, and PC. Notice that the alternate registers and the flag
+     register cannot be specified in the current version of Z80SIM.
+          The second form of the command tells Z80SIM to monitor a
+     sensitive location and trap when it is about to become the
+     specified value. Again, port addresses can be specified with a
+     "p" prefix. Also, the same register names are allowed as with the
+     first form.
+          The final form causes Z80SIM to display the currently
+     defined trap condition on the message line.
+
+     Possible Messages:
+
+     "INFO: Trap enabled on TRAP_CONDITION."
+
+          This message is the response to the "trap when" command
+          when a trap condition has been defined. TRAP_CONDITION will
+          be a copy of the command enter to set the condition. For
+          example, the message might read "INFO: Trap on READ FROM
+          P30." The message will say "disabled" if you've recently
+          issued a "trap off" command.
+
+     "INFO: User defined trap has never been enabled."
+
+          This message is the response to the "trap when" command
+          when you have not previously defined a trap condition or
+          when you've issued a "trap off" command.
+
+     "WARNING: User defined trap is not enabled."
+
+          This message occurs if you issue a "trap off" command when
+          the trap was not active.
+
+     "WARNING: User define trap is already enabled."
+
+          This message occurs if you issue a "trap on" command when
+          the trap was already active.
+
+!TRAPT
+                                trapt
+                                -----
+
+trapt NUMBER_OF_T-STATES
+  or
+trapt on|off
+  or
+trapt when
+
+          The trapt command enables (or disables) the Excessive T-
+     state trap. The first time trapt is used, you must specify a
+     NUMBER_OF_T-STATES. During a simulation, the number of simulated
+     T-states is counted. After the first instruction which causes
+     that number to exceed the number you specified, the Excessive T-
+     state trap is taken. The simulated T-state counter is reset after
+     every Excessive T-state trap, but not after any other kind of
+     trap.
+          The second form of the command allows you to disable the
+     Excessive T-state trap ("trapt off") or re-enable it ("trapt on")
+     with the same NUMBER_OF_T-STATES you specified earlier.
+          The third form of the command displays the current state of
+     the Excessive T-state trap.
+
+     Possible Messages:
+
+     "INFO: Excessive T-state trap enabled at NUMBER_OF_T-STATES."
+
+          This message is the response to "trapt when" if you've
+          previously issued a "trapt NUMBER_OF_T-STATES" command. The
+          message will say "disabled" if you've recently issued a
+          "trapt off" command.
+
+     "INFO: Excessive T-state trap has never been enabled."
+
+          This message is the response to "trapt when" if you have not
+          previously issued a "trapt NUMBER_OF_T-STATES".
+
+     "WARNING: Excessive T-state trap not enabled."
+
+          This message is the response to "trapt off" if the trap is
+          not active.
+
+     "WARNING: Excessive T-state trap is already enabled."
+
+          This message is the response to "trapt on" if the trap is
+          active.
+
+     "WARNING: Excessive T-state trap set far into the future."
+
+          If you specify more than 249,999 T-states, you will see
+          this message. For a 4 MHz Z-80, this corresponds to a
+          simulated time of one second. Z80SIM will require
+          considerably greater time to reach this trap condition.
+
+     "ERROR: No T-state count specified."
+
+          This is the response to "trapt on" if you have not yet used
+          the "trapt NUMBER_OF_T-STATES" form.
+
+     "ERROR: Invalid number of T-states: NUMBER_OF_T-STATES."
+
+          The number of T-states must be greater than zero and less
+          than one billion. You will also see this message if there
+          are illegal characters in NUMBER_OF_T-STATES.
+
+!VIEWM
+                                viewm
+                                -----
+
+viewm ADDRESS
+
+          This command allows you to change the area of memory
+     displayed on the main screen. Initially, Z80SIM shows you the
+     region starting at 0000H and running to 000FH. The address
+     specified with this command selects the starting address of the
+     displayed area. Thus "viewm 1000" allows you to see the region
+     from 1000H to 100FH.
+
+!VIEWP
+                                viewp
+                                -----
+
+viewp PORT_ADDRESS
+
+          This command allows you to change range of ports displayed
+     on the main screen. Initially, Z80SIM shows you the region
+     starting at port 00H and running to port 0FH. The port address
+     specified with this command selects the starting address of the
+     displayed range of ports. Thus "viewp 10" allows you to see the
+     ports from 10H to 1FH.
+
+!

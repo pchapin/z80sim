@@ -1,0 +1,347 @@
+
+
+
+
+
+
+                                    EL-214
+                                 Worksheet #01
+                                 =============
+
+     From the Text:
+          Read section  3.1 carefully. Take a look at sections 3.2 and 3.3.
+          We will dealing with hardware stuff  in  great  detail  in  a few
+          weeks so  you don't  need to  absorb all  the material in 3.2 and
+          3.3. Skip section 3.5.
+
+          Read chapters 6 carefully. Skip chapter 7. We will be telling you
+          what you need to know about the topics covered in chapter 7 while
+          you are in lab.
+
+     Consider the following questions from the text:
+
+          3.5
+
+     The PC and SP are 16 bit registers because they must hold addresses.
+For example, the PC holds the address of the next instruction. The Z-80
+address bus is 16 bits wide and thus registers that will hold addresses
+must be 16 bits.
+
+          3.7
+
+          We want IX+d to be 2097h when IX is 2058h. d must therefore be
+2097h - 2058h = 3Fh.
+
+          3.8
+
+     Here we need to go backwards. How far backwards? 2070h - 2050h = 20h
+bytes. Converting this to its two's complement form gives
+
+         20h =  0010 0000
+
+                1101 1111
+             +          1
+             =  1110 0000 = E0h
+
+          3.10
+
+     With 20 address lines the chip can deal with 2^20 = 1 Megabyte of
+memory.
+
+
+     Consider the following questions:
+
+     1.   Write a program which exchanges the data in registers B and C.
+
+     Solution:
+        LD      A, B            ; Save current B for later.
+        LD      B, C            ; Put the stuff in C into B.
+        LD      C, A            ; Put old B into C.
+
+
+     2.   Write a program which saves the  registers  A  through  L  in the
+          memory locations  1C00h through 1C06h. (Write a version that uses
+          IX and another version that does not).
+
+     Solution:
+        LD      (1C00h), A
+        LD      A, B
+        LD      (1C01h), A
+        LD      A, C
+        LD      (1C02h), A
+        LD      A, D
+        LD      (1C03h), A
+        LD      A, E
+        LD      (1C04h), A
+        LD      A, H
+        LD      (1C05h), A
+        LD      A, L
+        LD      (1C06h), A
+
+        or
+
+        LD      IX, 1C00h
+        LD      (IX+0), A
+        LD      (IX+1), B
+        LD      (IX+2), C
+        LD      (IX+3), D
+        LD      (IX+4), E
+        LD      (IX+5), H
+        LD      (IX+6), L
+
+
+     3.   Assemble the following program (use a starting address of 1800h).
+
+          ;-------------------------------------------------------------
+          ;    This program copies a table of 8 bytes from the starting
+          ;    location 1900h to the final location 1A00h.
+          ;-------------------------------------------------------------
+          LD   B, 8                ; Eight bytes to copy: load counter.
+          LD   HL, 1900h           ; Point at source.
+          LD   DE, 1A00h           ; Point at destination.
+     Top_Of_Loop:
+          LD   A, (HL)             ; Get a byte from the source.
+          EX   DE, HL
+          LD   (HL), A             ; Put it into the destination.
+          EX   DE, HL
+          INC  DE                  ; Point at next source byte.
+          INC  HL                  ; Point at next destination byte.
+          DEC  B                   ; Any more to copy?
+          JP   NZ, Top_Of_Loop     ; If yes, do it; otherwise...
+          HALT
+
+     Solution:
+        1800    06 08           LD      B, 8
+        1802    21 00 19        LD      HL, 1900h
+        1805    11 00 1A        LD      DE, 1A00h
+                           Top_Of_Loop:
+        1808    7E              LD      A, (HL)
+        1809    EB              EX      DE, HL
+        180A    77              LD      (HL), A
+        180B    EB              EX      DE, HL
+        180C    13              INC     DE
+        180D    23              INC     HL
+        180E    05              DEC     B
+        180F    C2 08 18        JP      NZ, Top_Of_Loop
+        1812    76              HALT
+
+          3.1. This  program  can  be  done  without  the  "EX     DE,  HL"
+               instructions. How?
+
+     Solution:
+     Replace lines 1808 - 180B with
+
+        LD      A, (HL)
+        LD      (DE), A
+
+     This takes advantage of the fact that (DE) can be used with A.
+
+
+     4.   Write a  program which  exchanges the 64 bytes in locations 1900h
+          through 193Fh  with  the  64  bytes  in  locations  1A00H through
+          1A3Fh.  In  other  words,  when the program is finished, location
+          1900h will have been exchanged with  1A00h, 1901h  will have been
+          exchanged with 1A01h, etc.
+
+     Solution:
+
+        ; Initialize counter and pointers.
+        LD      B, 8
+        LD      HL, 1900h
+        LD      DE, 1A00h
+
+     Top_Of_Loop:
+        ; Exchange current bytes (ie the bytes (HL) and (DE)).
+        LD      A, (HL)
+        LD      C, A
+        LD      A, (DE)
+        LD      (HL), A
+        LD      A, C
+        LD      (DE), A
+
+        ; Point at next bytes in memory.
+        INC     DE
+        INC     HL
+
+        ; Keep looping until all are done.
+        DEC     B
+        JP      NZ, Top_Of_Loop
+        HALT
+
+     5.   Assemble the following program (use a starting address of 1800h).
+
+          ;---------------------------------------------------------
+          ;    This is the first program from Lab #2 (more or less).
+          ;---------------------------------------------------------
+          LD        A, 80h              ; Initialize 8255A.
+          OUT       (0C3h), A
+     Start:
+          LD        B, 8                ; Eight bytes in table.
+          LD        IX, 1900h           ; Point at table.
+     Top_Of_Loop:
+          LD        A, (IX)             ; Get a byte from the table.
+          OUT       (0C0h), A           ; Display it.
+          LD        HL, 500             ; Delay for 1/2 sec. note: base 10!
+          CALL      0FFDh
+          INC       IX                  ; Point at next byte from table.
+          DEC       B                   ; Are there any more?
+          JP        NZ, Top_Of_Loop     ; If yes, do it; otherwise...
+          HALT
+
+     Solution:
+
+        1800    3E 80           LD      A, 80h
+        1802    D3 C3           OUT     (0C3h), A
+        1804    06 08           LD      B, 8
+        1806    DD 21 00 19     LD      IX, 1900h
+                            Top_Of_Loop:
+        180A    DD 7E 00        LD      A, (IX+0)
+        180D    D3 C0           OUT     (0C0h), A
+        180F    21 F4 01        LD      HL, 01F4h
+        1812    CD FD 0F        CALL    0FFDh
+        1815    DD 23           INC     IX
+        1817    05              DEC     B
+        1818    C2 0A 18        JP      NZ, Top_Of_Loop
+        181B    76              HALT
+
+     6.   Assemble the following program (use a starting address of 2000h).
+
+          ;---------------------------------------------------------------
+          ;    This program "flips around" the data in the block of memory
+          ;    from 1900h - 19FFh. When the program is done, the byte
+          ;    at 19FFh will be what was at 1900h. The byte at 19FEh will
+          ;    be what was at 1901h. Etc.
+          ;---------------------------------------------------------------
+          LD   B, 128              ; Do 128 exchanges (note: base 10!)
+          LD   HL, 1900h           ; Point at bottom of block.
+          LD   DE, 19FFh           ; Point at top of block.
+     Top_Of_Loop:
+          LD   A, (HL)             ; Exchange (HL) and (DE).
+          LD   C, A
+          LD   A, (DE)
+          LD   (HL), A
+          LD   A, C
+          LD   (DE), A
+          INC  HL                  ; Adjust pointers for next exchange.
+          DEC  DE
+          DEC  B                   ; Any more exchanges?
+          JP   NZ, Top_Of_Loop     ; Yes. Do next one; otherwise...
+          HALT
+
+     Solution:
+                                                        T       #       Total
+2000    06 80           LD      B, 128                  7       1       7
+2002    21 00 19        LD      HL, 1900h               10      1       10
+2005    11 FF 19        LD      DE, 19FFh               10      1       10
+                   Top_Of_Loop:
+2008    7E              LD      A, (HL)                 7       128     896
+2009    4F              LD      C, A                    4       128     512
+200A    1A              LD      A, (DE)                 7       128     896
+200B    77              LD      (HL), A                 7       128     896
+200C    79              LD      A, C                    4       128     512
+200D    12              LD      (DE), A                 7       128     896
+200E    23              INC     HL                      6       128     768
+200F    1B              INC     DE                      6       128     768
+2010    05              DEC     B                       4       128     512
+2011    C2 08 20        JP      NZ, Top_Of_Loop         10      128     1280
+2012    76              HALT                            4       1       4
+                                                                Total:  7967
+
+
+          6.1. If T = 558.7 nS (the CAMI trainer), how long does it take to
+               execute this program?
+
+     Solution:
+     Refer to the information above on number of T states per instruction
+and number of times each instruction executes. The total number of T states
+for the entire program is 7967. At 558.7 nS per T state this come up to
+
+        7967 * (558.7 nS) = 4.451 mS
+
+          6.2. There is a slightly more efficient way to  do the exchanges.
+               Can you  see it?  How long  does the program take if you use
+               that more efficient method?
+
+     Solution:
+     The new way requires that the instructions
+
+        LD      A, (HL)
+        LD      C, A
+        LD      A, (DE)
+        LD      (HL), A
+        LD      A, C
+        LD      (DE), A
+
+     be replaced with
+
+        LD      C, (HL)
+        LD      A, (DE)
+        LD      (HL), A
+        LD      A, C
+        LD      (DE), A
+
+     In other words, don't bother going through A for the load into C.
+     This saves 4 T states per loop pass for a total savings of 512 T
+states. Thus the new total is 7967 - 512 = 7455 T states. This translates
+into a time of 4.165 mS.
+
+
+     7.   The following instructions are not legal  instructions in  the Z-
+          80 instruction  set. However, they can be interpreted in terms of
+          the Z-80 conventions. Describe, as specifically as possible, what
+          each instruction would do. (Make a diagram).
+
+          7.1.      LD   (DE), (HL)
+
+     This is a memory to memory load. The byte whose address is stored in
+HL is being copied to the location whose address is stored in DE.
+
+          7.2.      LD   A, ((HL))
+
+     This is a doubly indirect load. HL is interpreted as an address. The
+16 bit number stored in memory (low byte first) at that location is also
+interpreted as an address. The data at that second location is loaded into
+A.
+
+          7.3.      LD   BC, ((HL))
+
+     This is similar to 7.2 above except that the data which is finally
+fetched out of memory is 16 bits. It is stored low byte first.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                          3
+

@@ -1,0 +1,22 @@
+SEVSEG: EQU 18A0H
+DISP_1S: EQU 1850H
+BEEPER: EQU 1870H
+KYBD: EQU 0FEBH
+
+          ORG 1800H
+MAIN:     LD A, 02
+          LD (1F21H),A
+          CALL KYBD       ;WAIT FOR KEYSTROKE
+          LD B,A
+MAINLOOP: LD A,B
+          CALL SEVSEG     ;CONVERT VALUE IN A TO 7-SEG. CODE
+          LD (1F21H),A
+          CALL DISP_1S    ;ACTIVATE DISPLAY FOR 1 SECOND
+          DEC B
+          JP NZ, MAINLOOP
+          CALL BEEPER     ;BEEP FOR 1/2 SECOND
+          JP MAIN
+
+          END
+
+

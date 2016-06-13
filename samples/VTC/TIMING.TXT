@@ -1,0 +1,24 @@
+
+EL-214 Worksheet on Timing
+==========================
+
+Assume that you have a Z-80A running at 4 MHz (full speed).
+
+How long must WAIT* be low during the memory read machine cycle to
+guarantee that it will be sensed correctly?
+
+With one wait state in the memory read machine cycle, how long after a
+valid address becomes available does memory have to produce valid data?
+
+What is the narrowest clock pulse allowed?
+
+What is the slowest rise time of the clock signal?
+
+How long is M1* low during the op-code fetch?
+
+During a memory read, is it possible for MREQ* to be valid before the
+address is valid?
+
+During a memory write, how long will the processor drive the data bus after
+WR* is released?
+

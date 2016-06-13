@@ -1,0 +1,112 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE         : ctc.tex
+% AUTHOR       : Peter Chapin
+% LAST REVISED : November 1995
+% SUBJECT      : CTC worksheet.
+%
+%
+% Send comments to Peter Chapin (pchapin@night.vtc.vsc.edu) or at the
+%   snail mail address of:
+%
+%       Peter Chapin
+%       Vermont Technical College
+%       Main Street
+%       Randolph Center, VT. 05061
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+% ++++++++++++++++++++++++++++++++
+\documentstyle{article}
+% \pagestyle{headings}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1.75ex plus0.5ex minus0.5ex}
+
+% +++++++++++++++++++
+% The document itself
+% +++++++++++++++++++
+\begin{document}
+
+\centerline{\Large{EL-214: Worksheet}}
+\centerline{\Large{CTC}}
+\vspace{0.5in}
+
+\begin{enumerate}
+
+\item Suppose you were working with a Z-80 CTC which was decoded so that
+channels zero through three appeared at port addresses F0H through F3H.
+Suppose also that you wanted to use channel zero to count 100 external
+events. Write a program fragment which will send the correct bytes to the
+CTC to configure it properly. Have the CTC interrupt the Z-80 when it is
+finished counting and have it return the vector number 70H during the
+interrupt acknowledge. (Make all don't care or unspecified bits in the
+configuration byte zero).
+
+\item Suppose the following program is executed to configure a Z-80 CTC
+system. (The CTC's channel zero is at port address 20H).
+
+\begin{verbatim}
+LD   A,33H
+LD   (2B40H),A
+LD   A,6CH
+LD   (2B41H),A
+LD   A,2BH
+LD   I,A
+
+LD   A,40H
+OUT  (20H),A
+LD   A,A5H
+OUT  (20H),A
+LD   A,10H
+OUT  (20H),A
+
+IM   2
+EI
+\end{verbatim}
+
+Answer the following two questions
+
+\begin{enumerate}
+
+\item The CTC is configured to interrupt the processor when it is done. What is
+the address of the interrupt service routine?
+
+\item The CTC is configured for timer mode, how long will it time given a 2 MHz
+clock?
+
+\end{enumerate}
+
+\item Answer the following questions about Z-80 CTC configuration
+limits. In all cases, assume that the Z-80 system clock
+frequency is 4 MHz.
+
+\begin{enumerate}
+
+\item What is the maximum amount of time that can be
+programmed in timer mode using only one channel?
+
+\item What is the maximum amount of time that can be
+programmed in timer mode using all four channels as timers? How should the
+CTC be wired? When programing such an arrangement, should all four timers
+be autotriggered?
+
+\item What is the maximum amount of time that can be
+programmed using all four channels in whatever way you desire? How should
+the CTC be wired?
+
+\item What is the maximum count possible using all four
+channels in counter mode? How should the CTC be wired?
+
+\end{enumerate}
+
+\item Assume that the system you are working with contains a CTC.
+The CTC is decoded so that channel zero is at port address 20H. Suppose you
+wanted channel zero's output to produce pulses with a frequency of 250 Hz.
+Show the instructions that you would use to configure the CTC. Make any
+``don't care'' bits in the configuration byte(s) zero. Assume the system
+clock rate is 4 MHz. No interrupts.
+
+\end{enumerate}
+
+\end{document}

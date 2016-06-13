@@ -1,0 +1,6 @@
+# Build artifacts of Visual Studio
+Debug
+Release
+z80sim.sdf
+z80sim.v12.suo
+z80sim.opensdf

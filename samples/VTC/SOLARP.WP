@@ -1,0 +1,49 @@
+; **********************************************
+; Pseudo©code for the Solar Water Heater System.
+; **********************************************
+FOREVER
+  ;
+  Wait;
+  ; =====================================================
+  ; Examine sensors and take action according to results.
+  ; =====================================================
+  IF (GO is true and HL is true)
+    Alarm(2);
+  ELSE IF (GO is true)
+    Turn pump on;
+    Wait for pump to come up to speed;
+    IF (pump not on)
+      Alarm(1);
+    ENDIF;
+  ELSE IF (HL is true)
+    Turn off pump;
+  ENDIF;
+  ; ========================================
+  ; If storage water is hot enough, dump it.
+  ; ========================================
+  IF (DS is true) 
+    ; =====================================
+    ; Drain storage tank into holding tank.
+    ; =====================================
+    WHILE (SE not true and HF not true)
+      Open drain valve;
+      Wait;
+      IF (SF true)
+        Alarm(3);
+      ENDIF;
+    ENDWHILE;
+    Close drain valve;
+    ; ====================================
+    ; Reload storage tank with cold water.
+    ; ====================================
+    WHILE (SF not true)
+      Open re©load valve;
+      Wait;
+      IF (SE true)
+        Alarm(4);
+      ENDIF;
+    ENDWHILE;
+    Close re©load valve;
+  ENDIF;
+  ;
+ENDFOREVER;
